@@ -1,0 +1,9 @@
+# syntax=docker/dockerfile:1
+FROM mysql/mysql-server:latest
+
+COPY docker/ssl/squirrel.crt /etc/mysql/certs/server.crt
+COPY docker/ssl/squirrel.key /etc/mysql/certs/server.key
+COPY docker/ssl/DadaismCA.crt /etc/mysql/certs/ca.crt
+
+RUN chmod 600 /etc/mysql/certs/server.key
+RUN chown mysql:mysql /etc/mysql/certs/server.key

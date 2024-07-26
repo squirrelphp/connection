@@ -1,0 +1,127 @@
+services:
+    coverage:
+        image: thecodingmachine/php:8.3-v4-cli
+        container_name: squirrel_connection_coverage
+        tty: true
+        working_dir: /usr/src/app
+        # --path-coverage could be added later, it is much too slow currently and only supported by xdebug
+        command: [ "vendor/bin/phpunit", "--configuration=tools/phpunit.xml.dist", "--colors=always", "--stop-on-defect", "--coverage-html", "tests/_reports"]
+        volumes:
+            - ./composer.json:/usr/src/app/composer.json
+            - ./composer.lock:/usr/src/app/composer.lock
+            - ./docker/ssl:/usr/src/app/ssl
+            - ./src:/usr/src/app/src
+            - ./tests:/usr/src/app/tests
+            - ./tools:/usr/src/app/tools
+            - ./vendor:/usr/src/app/vendor
+        environment:
+            # We currently use PCOV because it is at least 8x faster
+            # - 3 seconds compared to 23 seconds (or 5 minutes with path coverage enabled)
+            PHP_EXTENSION_XDEBUG: 1
+            XDEBUG_MODE: coverage
+            #PHP_EXTENSION_PCOV: 1
+            PHP_EXTENSION_APCU: 0
+            PHP_EXTENSION_REDIS: 0
+            PHP_EXTENSION_SQLITE3: 1
+            PHP_EXTENSION_PDO_MYSQL: 1
+            PHP_EXTENSION_PDO_PGSQL: 1
+            PHP_EXTENSION_PDO_SQLITE: 1
+            PHP_INI_MEMORY_LIMIT: 1g
+            PHP_INI_ERROR_REPORTING: E_ALL
+            SQUIRREL_CONNECTION_USER: 'user'
+            SQUIRREL_CONNECTION_PASSWORD: 'password'
+            SQUIRREL_CONNECTION_ROOT_PASSWORD: 'whatever'
+            SQUIRREL_CONNECTION_DBNAME: 'shop'
+            SQUIRREL_CONNECTION_HOST_MYSQL: 'squirrel_connection_mysql'
+            SQUIRREL_CONNECTION_HOST_MARIADB: 'squirrel_connection_mariadb'
+            SQUIRREL_CONNECTION_HOST_POSTGRES: 'squirrel_connection_postgres'
+            SQUIRREL_CONNECTION_SSL_CERT: '/usr/src/app/ssl/squirrel.crt'
+            SQUIRREL_CONNECTION_SSL_KEY: '/usr/src/app/ssl/squirrel.key'
+            SQUIRREL_CONNECTION_SSL_CA: '/usr/src/app/ssl/DadaismCA.crt'
+            COMPOSER_ROOT_VERSION: 'dev-master'
+            STARTUP_COMMAND_1: composer --no-interaction --no-progress --no-scripts --no-plugins --quiet install
+            STARTUP_COMMAND_2: rm -rf /usr/src/app/tests/_reports/*
+        depends_on:
+            - postgres
+            - mysql
+            - mariadb
+            - postgres_ssl
+            - mysql_ssl
+            - mariadb_ssl
+
+    postgres:
+        image: postgres:latest
+        container_name: squirrel_connection_postgres
+        volumes:
+            - ./docker/sql/postgres_init.sql:/docker-entrypoint-initdb.d/postgres_init.sql
+        environment:
+            POSTGRES_DB: 'shop'
+            POSTGRES_USER: 'user'
+            POSTGRES_PASSWORD: 'password'
+
+    mysql:
+        image: mysql/mysql-server:latest
+        container_name: squirrel_connection_mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: 'whatever'
+            MYSQL_DATABASE: 'shop'
+            MYSQL_USER: 'user'
+            MYSQL_PASSWORD: 'password'
+
+    mariadb:
+        image: mariadb:latest
+        container_name: squirrel_connection_mariadb
+        environment:
+            MARIADB_ROOT_PASSWORD: 'whatever'
+            MARIADB_DATABASE: 'shop'
+            MARIADB_USER: 'user'
+            MARIADB_PASSWORD: 'password'
+
+    postgres_ssl:
+        build:
+            context: .
+            dockerfile: ./docker/Dockerfile/postgres_ssl
+        container_name: squirrel_connection_postgres_ssl
+        volumes:
+            - ./docker/sql/postgres_init.sql:/docker-entrypoint-initdb.d/postgres_init.sql
+        environment:
+            POSTGRES_DB: 'shop'
+            POSTGRES_USER: 'user'
+            POSTGRES_PASSWORD: 'password'
+        command:
+            - --ssl_ca_file=/var/lib/postgresql/ca.crt
+            - --ssl_cert_file=/var/lib/postgresql/server.crt
+            - --ssl_key_file=/var/lib/postgresql/server.key
+            - --ssl=on
+
+    mysql_ssl:
+        build:
+            context: .
+            dockerfile: ./docker/Dockerfile/mysql_ssl
+        container_name: squirrel_connection_mysql_ssl
+        environment:
+            MYSQL_ROOT_PASSWORD: 'whatever'
+            MYSQL_DATABASE: 'shop'
+            MYSQL_USER: 'user'
+            MYSQL_PASSWORD: 'password'
+        command:
+            - --ssl-ca=/etc/mysql/certs/ca.crt
+            - --ssl-cert=/etc/mysql/certs/server.crt
+            - --ssl-key=/etc/mysql/certs/server.key
+            - --require-secure-transport=ON
+
+    mariadb_ssl:
+        build:
+            context: .
+            dockerfile: ./docker/Dockerfile/mariadb_ssl
+        container_name: squirrel_connection_mariadb_ssl
+        environment:
+            MARIADB_ROOT_PASSWORD: 'whatever'
+            MARIADB_DATABASE: 'shop'
+            MARIADB_USER: 'user'
+            MARIADB_PASSWORD: 'password'
+        command:
+            - --ssl-ca=/etc/mysql/certs/ca.crt
+            - --ssl-cert=/etc/mysql/certs/server.crt
+            - --ssl-key=/etc/mysql/certs/server.key
+            - --require-secure-transport=ON

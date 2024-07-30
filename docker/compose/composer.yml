@@ -8,6 +8,7 @@ services:
             driver: "none"
         volumes:
             - ./.editorconfig:/usr/src/app/.editorconfig
+            - ./.git:/usr/src/app/.git
             - ./bin:/usr/src/app/bin
             - ./composer.json:/usr/src/app/composer.json
             - ./composer.lock:/usr/src/app/composer.lock

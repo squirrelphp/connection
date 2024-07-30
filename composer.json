@@ -25,6 +25,7 @@
     },
     "require-dev": {
         "captainhook/captainhook-phar": "^5.0",
+        "captainhook/hook-installer": "^1.0",
         "phpunit/phpunit": "^11.0",
         "mockery/mockery": "^1.0",
         "squirrelphp/types": "^1.0",
@@ -40,7 +41,13 @@
     "config": {
         "sort-packages": false,
         "allow-plugins": {
-            "captainhook/captainhook-phar": true
+            "captainhook/captainhook-phar": true,
+            "captainhook/hook-installer": true
+        }
+    },
+    "extra": {
+        "captainhook": {
+            "config": "tools/captainhook.json"
         }
     },
     "autoload": {
@@ -54,6 +61,7 @@
         }
     },
     "scripts": {
+        "captainhook_install": "vendor/bin/captainhook install --configuration=tools/captainhook.json --ansi --no-interaction",
         "phpstan": "vendor-bin/phpstan/vendor/bin/phpstan analyse --configuration=tools/phpstan.neon",
         "phpstan_full": "rm -Rf tools/cache/phpstan && vendor-bin/phpstan/vendor/bin/phpstan analyse --configuration=tools/phpstan.neon",
         "phpstan_base": "vendor-bin/phpstan/vendor/bin/phpstan analyse --configuration=tools/phpstan.neon --generate-baseline=tools/phpstan-baseline.php",

@@ -9,4 +9,4 @@ docker compose -f "$DIR/compose/test.yml" --project-directory "$DIR/.." down --v
 docker compose -f "$DIR/compose/test.yml" --project-directory "$DIR/.." up --build --force-recreate --renew-anon-volumes --remove-orphans --always-recreate-deps --abort-on-container-exit --exit-code-from=test test
 
 # Remove all running docker containers
-#docker compose -f "$DIR/compose/test.yml" --project-directory "$DIR/.." down --volumes --remove-orphans
+docker compose -f "$DIR/compose/test.yml" --project-directory "$DIR/.." down --volumes --remove-orphans

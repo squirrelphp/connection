@@ -4,6 +4,7 @@ namespace Squirrel\Connection\Tests\Integration;
 
 use Squirrel\Connection\Config\Pgsql;
 use Squirrel\Connection\Config\Ssl;
+use Squirrel\Connection\Config\SslVerification;
 use Squirrel\Connection\ConnectionInterface;
 use Squirrel\Connection\PDO\ConnectionPDO;
 use Squirrel\Connection\Tests\Integration\Features\SchemaIdentifierTestsTrait;
@@ -32,6 +33,7 @@ class PostgreSQLSSLTest extends PostgreSQLTest
                     certificatePath: $_SERVER['SQUIRREL_CONNECTION_SSL_CERT'],
                     privateKeyPath: $_SERVER['SQUIRREL_CONNECTION_SSL_KEY'],
                     rootCertificatePath: $_SERVER['SQUIRREL_CONNECTION_SSL_CA'],
+                    verification: SslVerification::None,
                 ),
             ),
         );

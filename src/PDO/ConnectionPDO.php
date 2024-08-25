@@ -7,6 +7,7 @@ use PDOException;
 use Squirrel\Connection\Config\Mysql;
 use Squirrel\Connection\Config\Pgsql;
 use Squirrel\Connection\Config\Sqlite;
+use Squirrel\Connection\Config\SslVerification;
 use Squirrel\Connection\ConnectionInterface;
 use Squirrel\Connection\ConnectionQueryInterface;
 use Squirrel\Connection\Exception\InvalidArgumentException;
@@ -37,7 +38,12 @@ final class ConnectionPDO implements ConnectionInterface
                 $options[PDO::MYSQL_ATTR_SSL_CA] = $this->config->ssl->rootCertificatePath;
                 $options[PDO::MYSQL_ATTR_SSL_KEY] = $this->config->ssl->privateKeyPath;
                 $options[PDO::MYSQL_ATTR_SSL_CERT] = $this->config->ssl->certificatePath;
-                $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+
+                $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = match ($this->config->ssl->verification) {
+                    SslVerification::None => false,
+                    SslVerification::Ca => throw new InvalidArgumentException('Mysql SSL connections do not support to only verify the CA - only no verification or both CA and hostname verification are supported by the PHP driver'),
+                    SslVerification::CaAndHostname => true,
+                };
             }
         }
 
@@ -54,14 +60,19 @@ final class ConnectionPDO implements ConnectionInterface
         };
 
         if ($this->config instanceof Pgsql) {
-            $this->dsn = 'pgsql:host=' . $this->config->host . ';port=' . $this->config->port . ( $this->config->dbname !== null ? ';dbname=' . $this->config->dbname : '' ) . ';options=\'--client_encoding=' . $this->config->charset . '\'' . ( $this->config->ssl !== null ? ';sslmode=verify-ca;sslcert=' . $this->config->ssl->certificatePath . ';sslkey=' . $this->config->ssl->privateKeyPath . ';sslrootcert=' . $this->config->ssl->rootCertificatePath : '' );
+            $sslmode = match ($this->config->ssl?->verification) {
+                null => 'prefer',
+                SslVerification::None => 'require',
+                SslVerification::Ca => 'verify-ca',
+                SslVerification::CaAndHostname => 'verify-full',
+            };
+
+            $this->dsn = 'pgsql:host=' . $this->config->host . ';port=' . $this->config->port . ( $this->config->dbname !== null ? ';dbname=' . $this->config->dbname : '' ) . ';options=\'--client_encoding=' . $this->config->charset . '\'' . ';sslmode=' . $sslmode . ( $this->config->ssl !== null ? ';sslcert=' . $this->config->ssl->certificatePath . ';sslkey=' . $this->config->ssl->privateKeyPath . ';sslrootcert=' . $this->config->ssl->rootCertificatePath : '' );
         } elseif ($this->config instanceof Sqlite) {
             $this->dsn = 'sqlite:' . ( $this->config->path !== null ? $this->config->path : ':memory:' );
         } else {
             $this->dsn = 'mysql:host=' . $this->config->host . ';port=' . $this->config->port . ( $this->config->dbname !== null ? ';dbname=' . $this->config->dbname : '' ) . ';charset=' . $this->config->charset;
         }
-
-
 
         $this->connect();
     }

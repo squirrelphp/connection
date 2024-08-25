@@ -4,6 +4,7 @@ namespace Squirrel\Connection\Tests\Integration;
 
 use Squirrel\Connection\Config\Mysql;
 use Squirrel\Connection\Config\Ssl;
+use Squirrel\Connection\Config\SslVerification;
 use Squirrel\Connection\ConnectionInterface;
 use Squirrel\Connection\PDO\ConnectionPDO;
 use Squirrel\Connection\Tests\Integration\Features\NonSecureConnectionTestTrait;
@@ -31,6 +32,7 @@ class MySQLSSLTest extends MySQLTest
                     certificatePath: $_SERVER['SQUIRREL_CONNECTION_SSL_CERT'],
                     privateKeyPath: $_SERVER['SQUIRREL_CONNECTION_SSL_KEY'],
                     rootCertificatePath: $_SERVER['SQUIRREL_CONNECTION_SSL_CA'],
+                    verification: SslVerification::None,
                 ),
             ),
         );

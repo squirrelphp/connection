@@ -5,6 +5,7 @@ namespace Squirrel\Connection\PDO;
 use PDOStatement;
 use Squirrel\Connection\ConnectionQueryInterface;
 
+/** @internal */
 readonly class ConnectionQueryPDO implements ConnectionQueryInterface
 {
     public function __construct(

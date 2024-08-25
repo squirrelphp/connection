@@ -8,6 +8,7 @@ final readonly class Ssl
         public string $rootCertificatePath,
         public string $privateKeyPath,
         public string $certificatePath,
+        public SslVerification $verification = SslVerification::CaAndHostname,
     ) {
     }
 }

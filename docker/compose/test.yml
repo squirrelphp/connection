@@ -39,8 +39,11 @@ services:
             - mysql
             - mariadb
             - postgres_ssl
+            - postgres_ssl_ca
             - mysql_ssl
+            - mysql_ssl_ca
             - mariadb_ssl
+            - mariadb_ssl_ca
 
     postgres:
         image: postgres:latest
@@ -87,6 +90,23 @@ services:
             - --ssl_key_file=/var/lib/postgresql/server.key
             - --ssl=on
 
+    postgres_ssl_ca:
+        build:
+            context: .
+            dockerfile: ./docker/Dockerfile/postgres_ssl
+        container_name: squirrel_connection_postgres_ssl_ca
+        volumes:
+            - ./docker/sql/postgres_init.sql:/docker-entrypoint-initdb.d/postgres_init.sql
+        environment:
+            POSTGRES_DB: 'shop'
+            POSTGRES_USER: 'user'
+            POSTGRES_PASSWORD: 'password'
+        command:
+            - --ssl_ca_file=/var/lib/postgresql/ca.crt
+            - --ssl_cert_file=/var/lib/postgresql/server.crt
+            - --ssl_key_file=/var/lib/postgresql/server.key
+            - --ssl=on
+
     mysql_ssl:
         build:
             context: .
@@ -103,11 +123,43 @@ services:
             - --ssl-key=/etc/mysql/certs/server.key
             - --require-secure-transport=ON
 
+    mysql_ssl_ca:
+        build:
+            context: .
+            dockerfile: ./docker/Dockerfile/mysql_ssl
+        container_name: squirrel_connection_mysql_ssl_ca
+        environment:
+            MYSQL_ROOT_PASSWORD: 'whatever'
+            MYSQL_DATABASE: 'shop'
+            MYSQL_USER: 'user'
+            MYSQL_PASSWORD: 'password'
+        command:
+            - --ssl-ca=/etc/mysql/certs/ca.crt
+            - --ssl-cert=/etc/mysql/certs/server.crt
+            - --ssl-key=/etc/mysql/certs/server.key
+            - --require-secure-transport=ON
+
     mariadb_ssl:
         build:
             context: .
             dockerfile: ./docker/Dockerfile/mariadb_ssl
         container_name: squirrel_connection_mariadb_ssl
+        environment:
+            MARIADB_ROOT_PASSWORD: 'whatever'
+            MARIADB_DATABASE: 'shop'
+            MARIADB_USER: 'user'
+            MARIADB_PASSWORD: 'password'
+        command:
+            - --ssl-ca=/etc/mysql/certs/ca.crt
+            - --ssl-cert=/etc/mysql/certs/server.crt
+            - --ssl-key=/etc/mysql/certs/server.key
+            - --require-secure-transport=ON
+
+    mariadb_ssl_ca:
+        build:
+            context: .
+            dockerfile: ./docker/Dockerfile/mariadb_ssl
+        container_name: squirrel_connection_mariadb_ssl_ca
         environment:
             MARIADB_ROOT_PASSWORD: 'whatever'
             MARIADB_DATABASE: 'shop'

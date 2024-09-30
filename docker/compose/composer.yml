@@ -1,22 +1,13 @@
 services:
     composer:
-        image: thecodingmachine/php:8.3-v4-cli
-        container_name: squirrel_connection_composer
+        image: thecodingmachine/php:8.2-v4-cli
+        container_name: squirrel_composer
         working_dir: /usr/src/app
         command: [ "composer", "${COMPOSER_COMMAND}", "--ansi" ]
         logging:
             driver: "none"
         volumes:
-            - ./.editorconfig:/usr/src/app/.editorconfig
-            - ./.git:/usr/src/app/.git
-            - ./bin:/usr/src/app/bin
-            - ./composer.json:/usr/src/app/composer.json
-            - ./composer.lock:/usr/src/app/composer.lock
-            - ./src:/usr/src/app/src
-            - ./tests:/usr/src/app/tests
-            - ./tools:/usr/src/app/tools
-            - ./vendor:/usr/src/app/vendor
-            - ./vendor-bin:/usr/src/app/vendor-bin
+            - .:/usr/src/app
             - "$HOME/.cache/composer:/tmp/composer_cache"
         environment:
             COMPOSER_CACHE_DIR: "/tmp/composer_cache"

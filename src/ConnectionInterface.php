@@ -18,9 +18,6 @@ interface ConnectionInterface
     /** @param array<scalar|LargeObject> $values */
     public function executeQuery(ConnectionQueryInterface $query, array $values = []): void;
 
-    /** @param array<scalar|LargeObject> $values */
-    public function prepareAndExecuteQuery(string $query, array $values = []): ConnectionQueryInterface;
-
     /** @return array<string, scalar|null>|null */
     public function fetchOne(ConnectionQueryInterface $query): ?array;
 

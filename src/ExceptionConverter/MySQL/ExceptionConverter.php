@@ -19,6 +19,10 @@ use Squirrel\Connection\Exception\TableNotFoundException;
 use Squirrel\Connection\Exception\UniqueConstraintViolationException;
 use Squirrel\Connection\ExceptionConverter\ExceptionConverterInterface;
 
+use function is_string;
+use function trigger_error;
+use function var_export;
+
 /** @internal */
 final class ExceptionConverter implements ExceptionConverterInterface
 {
@@ -30,8 +34,12 @@ final class ExceptionConverter implements ExceptionConverterInterface
     {
         if ($exception->errorInfo !== null) {
             [$sqlState, $code] = $exception->errorInfo;
+
+            if (!is_string($sqlState)) {
+                throw new \LogicException('sqlState was not set to a string, instead it is: ' . var_export($sqlState, true));
+            }
         } else {
-            \trigger_error('No errorInfo available for PDOException', E_USER_WARNING);
+            trigger_error('No errorInfo available for PDOException', E_USER_WARNING);
 
             $code     = $exception->getCode();
             $sqlState = '';

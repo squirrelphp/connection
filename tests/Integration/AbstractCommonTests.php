@@ -47,8 +47,8 @@ abstract class AbstractCommonTests extends \PHPUnit\Framework\TestCase
     {
         $db = static::getConnection();
 
-        $db->prepareAndExecuteQuery('DROP TABLE IF EXISTS account');
-        $db->prepareAndExecuteQuery(static::createAccountTableQuery());
+        self::prepareAndExecuteQuery($db, 'DROP TABLE IF EXISTS account');
+        self::prepareAndExecuteQuery($db, static::createAccountTableQuery());
 
         return $db;
     }
@@ -62,6 +62,14 @@ abstract class AbstractCommonTests extends \PHPUnit\Framework\TestCase
     protected static function generatePlaceholders(array $values): array
     {
         return \array_map(fn($v) => '?', $values);
+    }
+
+    protected static function prepareAndExecuteQuery(ConnectionInterface $db, string $query, array $values = []): ConnectionQueryInterface
+    {
+        $query = $db->prepareQuery($query);
+        $db->executeQuery($query, $values);
+
+        return $query;
     }
 
     protected static function prepareSelectFromAccount(array $where): ConnectionQueryInterface
@@ -520,7 +528,7 @@ abstract class AbstractCommonTests extends \PHPUnit\Framework\TestCase
         self::$db = static::getConnectionAndInitializeAccount();
 
         try {
-            self::$db->prepareAndExecuteQuery(static::createAccountTableQuery());
+            self::prepareAndExecuteQuery(self::$db, static::createAccountTableQuery());
 
             $this->fail('No exception was thrown');
         } catch (DriverException $e) {

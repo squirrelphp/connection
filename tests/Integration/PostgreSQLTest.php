@@ -73,9 +73,10 @@ class PostgreSQLTest extends AbstractCommonTests
     {
         self::$db = static::getConnectionAndInitializeAccount();
 
-        self::$db->prepareAndExecuteQuery('DROP TABLE IF EXISTS locations');
+        self::prepareAndExecuteQuery(self::$db, 'DROP TABLE IF EXISTS locations');
 
-        self::$db->prepareAndExecuteQuery(
+        self::prepareAndExecuteQuery(
+            self::$db,
             'CREATE TABLE locations (
                current_location POINT,
                ip_address INET,
@@ -83,7 +84,7 @@ class PostgreSQLTest extends AbstractCommonTests
              );',
         );
 
-        self::$db->prepareAndExecuteQuery('INSERT INTO "locations" (current_location, ip_address, create_date) VALUES (?, ?, ?)', [
+        self::prepareAndExecuteQuery(self::$db, 'INSERT INTO "locations" (current_location, ip_address, create_date) VALUES (?, ?, ?)', [
             'current_location' => '(5,13)',
             'ip_address' => '212.55.108.55',
             'create_date' => 34534543,

@@ -160,14 +160,6 @@ final class ConnectionPDO implements ConnectionInterface
         }
     }
 
-    public function prepareAndExecuteQuery(string $query, array $values = []): ConnectionQueryInterface
-    {
-        $query = $this->prepareQuery($query);
-        $this->executeQuery($query, $values);
-
-        return $query;
-    }
-
     public function fetchOne(ConnectionQueryInterface $query): ?array
     {
         $this->validateConnectionQueryType($query);

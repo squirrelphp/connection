@@ -68,7 +68,7 @@ class MySQLSSLStrictTest extends MySQLTest
     public function testCAVerificationOnlyOption(): void
     {
         try {
-            new ConnectionPDO(
+            $connection = new ConnectionPDO(
                 new Mysql(
                     host: $_SERVER['SQUIRREL_CONNECTION_HOST_MYSQL'] . '_ssl_ca',
                     user: $_SERVER['SQUIRREL_CONNECTION_USER'],
@@ -82,6 +82,8 @@ class MySQLSSLStrictTest extends MySQLTest
                     ),
                 ),
             );
+
+            $connection->reconnect();
 
             $this->fail('No exception was thrown');
         } catch (InvalidArgumentException $e) {

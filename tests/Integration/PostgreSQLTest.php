@@ -55,7 +55,7 @@ class PostgreSQLTest extends AbstractCommonTests
     public function testConnectError(): void
     {
         try {
-            new ConnectionPDO(
+            $connection = new ConnectionPDO(
                 new Pgsql(
                     host: 'not_reachable',
                     user: $_SERVER['SQUIRREL_CONNECTION_USER'],
@@ -63,6 +63,10 @@ class PostgreSQLTest extends AbstractCommonTests
                     dbname: $_SERVER['SQUIRREL_CONNECTION_DBNAME'],
                 ),
             );
+
+            $connection->reconnect();
+
+            $this->fail('No connection error occured');
         } catch (DriverException $e) {
             $this->assertSame(ConnectionException::class, $e::class);
             $this->assertSame('08006', $e->getSqlState());

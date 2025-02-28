@@ -13,7 +13,8 @@ trait NonSecureConnectionTestTrait
     private function nonSecureConnectionMustFail(Mysql|Pgsql $config): void
     {
         try {
-            new ConnectionPDO($config);
+            $connection = new ConnectionPDO($config);
+            $connection->reconnect();
 
             $this->fail('No exception was thrown');
         } catch (DriverException $e) {

@@ -17,6 +17,8 @@ use Squirrel\Connection\LargeObject;
 final class ConnectionPDO implements ConnectionInterface
 {
     private PDO $pdo; // not readonly because can be recreated to reconnect
+    private bool $connected = false;
+
     /** @var array<int, scalar> */
     private readonly array $options;
     private readonly string $dsn;
@@ -73,8 +75,6 @@ final class ConnectionPDO implements ConnectionInterface
         } else {
             $this->dsn = 'mysql:host=' . $this->config->host . ';port=' . $this->config->port . ( $this->config->dbname !== null ? ';dbname=' . $this->config->dbname : '' ) . ';charset=' . $this->config->charset;
         }
-
-        $this->connect();
     }
 
     private function connect(): void
@@ -93,13 +93,24 @@ final class ConnectionPDO implements ConnectionInterface
                     options: $this->options,
                 );
             }
+
+            $this->connected = true;
         } catch (PDOException $e) {
             throw $this->exceptionConverter->convert($e);
         }
     }
 
+    private function connectIfNecessary(): void
+    {
+        if (!$this->connected) {
+            $this->connect();
+        }
+    }
+
     public function beginTransaction(): void
     {
+        $this->connectIfNecessary();
+
         try {
             $this->pdo->beginTransaction();
         } catch (PDOException $e) {
@@ -109,6 +120,8 @@ final class ConnectionPDO implements ConnectionInterface
 
     public function commitTransaction(): void
     {
+        $this->connectIfNecessary();
+
         try {
             $this->pdo->commit();
         } catch (PDOException $e) {
@@ -118,6 +131,8 @@ final class ConnectionPDO implements ConnectionInterface
 
     public function rollbackTransaction(): void
     {
+        $this->connectIfNecessary();
+
         try {
             $this->pdo->rollBack();
         } catch (PDOException $e) {
@@ -127,6 +142,8 @@ final class ConnectionPDO implements ConnectionInterface
 
     public function prepareQuery(string $query): ConnectionQueryPDO
     {
+        $this->connectIfNecessary();
+
         try {
             return new ConnectionQueryPDO($this->pdo->prepare($query), $query);
         } catch (PDOException $e) {
@@ -136,6 +153,8 @@ final class ConnectionPDO implements ConnectionInterface
 
     public function executeQuery(ConnectionQueryInterface $query, array $values = []): void
     {
+        $this->connectIfNecessary();
+
         $this->validateConnectionQueryType($query);
 
         try {
@@ -162,6 +181,8 @@ final class ConnectionPDO implements ConnectionInterface
 
     public function fetchOne(ConnectionQueryInterface $query): ?array
     {
+        $this->connectIfNecessary();
+
         $this->validateConnectionQueryType($query);
 
         try {
@@ -179,6 +200,8 @@ final class ConnectionPDO implements ConnectionInterface
 
     public function fetchAll(ConnectionQueryInterface $query): array
     {
+        $this->connectIfNecessary();
+
         $this->validateConnectionQueryType($query);
 
         try {
@@ -207,6 +230,8 @@ final class ConnectionPDO implements ConnectionInterface
 
     public function freeResults(ConnectionQueryInterface $query): void
     {
+        $this->connectIfNecessary();
+
         $this->validateConnectionQueryType($query);
 
         try {
@@ -218,6 +243,8 @@ final class ConnectionPDO implements ConnectionInterface
 
     public function rowCount(ConnectionQueryInterface $query): int
     {
+        $this->connectIfNecessary();
+
         $this->validateConnectionQueryType($query);
 
         try {
@@ -229,6 +256,8 @@ final class ConnectionPDO implements ConnectionInterface
 
     public function lastInsertId(): string
     {
+        $this->connectIfNecessary();
+
         try {
             return \strval($this->pdo->lastInsertId());
         } catch (PDOException $e) {

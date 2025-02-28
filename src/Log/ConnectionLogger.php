@@ -95,4 +95,9 @@ final class ConnectionLogger implements ConnectionInterface
     {
         return $this->logs;
     }
+
+    public function resetLogs(): void
+    {
+        $this->logs = [];
+    }
 }

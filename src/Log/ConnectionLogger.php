@@ -11,7 +11,7 @@ use Squirrel\Connection\LargeObject;
  */
 final class ConnectionLogger implements ConnectionInterface
 {
-    /** @var list<array{query: string, values: array<scalar|LargeObject>, time: int}> */
+    /** @var list<array{query: string, values: array<int|float|string|bool|null|LargeObject>, time: int}> */
     private array $logs = [];
 
     public function __construct(
@@ -90,7 +90,7 @@ final class ConnectionLogger implements ConnectionInterface
         return $this->implementation->quoteIdentifier($identifier);
     }
 
-    /** @return list<array{query: string, values: array<scalar|LargeObject>, time: int}> */
+    /** @return list<array{query: string, values: array<int|float|string|bool|null|LargeObject>, time: int}> */
     public function getLogs(): array
     {
         return $this->logs;

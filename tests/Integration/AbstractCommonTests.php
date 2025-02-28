@@ -143,7 +143,7 @@ abstract class AbstractCommonTests extends \PHPUnit\Framework\TestCase
 
         $this->assertSame('1', $userId);
 
-        $where = ['user_id' => 1];
+        $where = ['user_id' => Coerce::toInt($userId)];
 
         $selectQuery = self::prepareSelectFromAccount($where);
         self::$db->executeQuery($selectQuery, $where);
@@ -155,6 +155,47 @@ abstract class AbstractCommonTests extends \PHPUnit\Framework\TestCase
         }
 
         $accountData['phone'] = null;
+        $accountData['user_id'] = Coerce::toInt($userId);
+
+        $this->compareDataArrays($accountData, $insertedData);
+    }
+
+    public function testInsertWithNull(): void
+    {
+        self::$db = static::getConnectionAndInitializeAccount();
+
+        $accountData = [
+            'username' => 'Mary',
+            'password' => 'secret',
+            'email' => 'mary@mary.com',
+            'birthdate' => null,
+            'phone' => null,
+            'balance' => 105.2,
+            'description' => 'I am dynamic and nice!',
+            'picture' => new LargeObject(\hex2bin(\md5('dadaism'))),
+            'active' => true,
+            'create_date' => 48674935,
+        ];
+
+        $insertQuery = self::prepareInsertIntoAccount($accountData);
+
+        self::$db->executeQuery($insertQuery, $accountData);
+
+        $userId = self::$db->lastInsertId();
+
+        $this->assertSame('1', $userId);
+
+        $where = ['user_id' => Coerce::toInt($userId)];
+
+        $selectQuery = self::prepareSelectFromAccount($where);
+        self::$db->executeQuery($selectQuery, $where);
+
+        $insertedData = self::$db->fetchOne($selectQuery);
+
+        if ($insertedData === null) {
+            throw new \LogicException('Inserted row not found');
+        }
+
         $accountData['user_id'] = Coerce::toInt($userId);
 
         $this->compareDataArrays($accountData, $insertedData);
@@ -172,8 +213,8 @@ abstract class AbstractCommonTests extends \PHPUnit\Framework\TestCase
             'username' => 'John',
             'password' => 'othersecret',
             'email' => 'supi@mary.com',
-            'birthdate' => '1984-05-08',
-            'balance' => 800,
+            'birthdate' => '1984-03-08', // changed from 1984-05-08
+            'balance' => 700, // changed from 800
             'description' => 'I am dynamicer and nicer!',
             'picture' => $picture,
             'active' => true,
@@ -214,6 +255,62 @@ abstract class AbstractCommonTests extends \PHPUnit\Framework\TestCase
         $rowsAffected = self::$db->rowCount($updateQuery);
 
         $this->assertEquals(1, $rowsAffected);
+    }
+
+    public function testUpdateWithNull(): void
+    {
+        self::$db = static::getConnectionAndInitializeAccount();
+
+        $this->initializeDataWithDefaultTwoEntries();
+
+        $picture = new LargeObject(\hex2bin(\md5('dadaism')));
+
+        $accountData = [
+            'username' => 'John',
+            'password' => 'othersecret',
+            'email' => 'supi@mary.com',
+            'birthdate' => null, // changed to null
+            'balance' => 800.0,
+            'description' => 'I am dynamicer and nicer!',
+            'picture' => $picture,
+            'active' => true,
+            'create_date' => 486749356,
+        ];
+
+        $where = ['user_id' => 2];
+
+        // UPDATE where changes are made and we should get one affected row
+        $updateQuery = self::prepareUpdateAccount($accountData, $where);
+
+        self::$db->executeQuery($updateQuery, \array_merge(\array_values($accountData), \array_values($where)));
+
+        $rowsAffected = self::$db->rowCount($updateQuery);
+
+        $this->assertEquals(1, $rowsAffected);
+
+        $selectQuery = self::prepareSelectFromAccount($where);
+        self::$db->executeQuery($selectQuery, $where);
+
+        $insertedData = self::$db->fetchOne($selectQuery);
+
+        if ($insertedData === null) {
+            throw new \LogicException('Inserted row not found');
+        }
+
+        $comparableAccountData = $accountData;
+        $comparableAccountData['phone'] = null;
+        $comparableAccountData['user_id'] = 2;
+
+        $this->compareDataArrays($comparableAccountData, $insertedData);
+
+        $where = ['birthdate' => null];
+
+        $selectQuery = self::prepareSelectFromAccount($where);
+        self::$db->executeQuery($selectQuery, $where);
+
+        $insertedData = self::$db->fetchOne($selectQuery);
+
+        $this->assertNull($insertedData, 'Query for birthdate NULL got a result, even though it should not, because using null in WHERE part should not work');
     }
 
     public function testCount(): void

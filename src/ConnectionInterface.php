@@ -15,13 +15,13 @@ interface ConnectionInterface
 
     public function prepareQuery(string $query): ConnectionQueryInterface;
 
-    /** @param array<scalar|LargeObject> $values */
+    /** @param array<int|float|string|bool|null|LargeObject> $values */
     public function executeQuery(ConnectionQueryInterface $query, array $values = []): void;
 
-    /** @return array<string, scalar|null>|null */
+    /** @return array<string, int|float|string|bool|null>|null */
     public function fetchOne(ConnectionQueryInterface $query): ?array;
 
-    /** @return list<array<string, scalar|null>> */
+    /** @return list<array<string, int|float|string|bool|null>> */
     public function fetchAll(ConnectionQueryInterface $query): array;
 
     public function freeResults(ConnectionQueryInterface $query): void;

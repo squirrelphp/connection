@@ -7,13 +7,16 @@ namespace Squirrel\Connection\Config;
  */
 final readonly class Mysql
 {
+    public const DEFAULT_PORT = 3306;
+    public const DEFAULT_CHARSET = 'utf8mb4';
+
     public function __construct(
         public string $host,
         public string $user,
         #[\SensitiveParameter] public string $password,
-        public int $port = 3306,
+        public int $port = self::DEFAULT_PORT,
         public ?string $dbname = null,
-        public string $charset = 'utf8mb4',
+        public string $charset = self::DEFAULT_CHARSET,
         public ?Ssl $ssl = null,
     ) {
     }

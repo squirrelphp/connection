@@ -18,7 +18,6 @@ use Squirrel\Connection\ExceptionConverter\ExceptionConverterInterface;
 
 use function is_string;
 use function str_contains;
-use function trigger_error;
 use function var_export;
 
 /** @internal */
@@ -27,15 +26,14 @@ final class ExceptionConverter implements ExceptionConverterInterface
     /** @link http://www.sqlite.org/c3ref/c_abort.html */
     public function convert(\PDOException $exception, ?string $query = null): DriverException
     {
+        $sqlState = '';
+
         if ($exception->errorInfo !== null) {
-            [$sqlState, $code] = $exception->errorInfo;
+            $sqlState = $exception->errorInfo[0];
 
             if (!is_string($sqlState)) {
                 throw new \LogicException('sqlState was not set to a string, instead it is: ' . var_export($sqlState, true));
             }
-        } else {
-            trigger_error('No errorInfo available for PDOException', E_USER_WARNING);
-            $sqlState = '';
         }
 
         if (str_contains($exception->getMessage(), 'database is locked')) {

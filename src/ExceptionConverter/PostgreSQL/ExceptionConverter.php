@@ -20,7 +20,6 @@ use Squirrel\Connection\ExceptionConverter\ExceptionConverterInterface;
 
 use function is_string;
 use function str_contains;
-use function trigger_error;
 use function var_export;
 
 /** @internal */
@@ -29,15 +28,14 @@ final class ExceptionConverter implements ExceptionConverterInterface
     /** @link http://www.postgresql.org/docs/9.4/static/errcodes-appendix.html */
     public function convert(\PDOException $exception, ?string $query = null): DriverException
     {
+        $sqlState = '';
+
         if ($exception->errorInfo !== null) {
-            [$sqlState, $code] = $exception->errorInfo;
+            $sqlState = $exception->errorInfo[0];
 
             if (!is_string($sqlState)) {
                 throw new \LogicException('sqlState was not set to a string, instead it is: ' . var_export($sqlState, true));
             }
-        } else {
-            trigger_error('No errorInfo available for PDOException', E_USER_WARNING);
-            $sqlState = '';
         }
 
         if ($sqlState === '0A000' && str_contains($exception->getMessage(), 'truncate')) {

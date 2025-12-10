@@ -3,6 +3,8 @@
 namespace Squirrel\Connection\PDO;
 
 use PDO;
+use Pdo\Mysql as PdoMysql;
+use Pdo\Pgsql as PdoPgsql;
 use PDOException;
 use Squirrel\Connection\Config\Mysql;
 use Squirrel\Connection\Config\Pgsql;
@@ -33,15 +35,15 @@ final class ConnectionPDO implements ConnectionInterface
         $options[PDO::ATTR_AUTOCOMMIT] = true;
 
         if ($this->config instanceof Mysql) {
-            $options[PDO::MYSQL_ATTR_MULTI_STATEMENTS] = false;
-            $options[PDO::MYSQL_ATTR_FOUND_ROWS] = true;
+            $options[PdoMysql::ATTR_MULTI_STATEMENTS] = false;
+            $options[PdoMysql::ATTR_FOUND_ROWS] = true;
 
             if ($this->config->ssl !== null) {
-                $options[PDO::MYSQL_ATTR_SSL_CA] = $this->config->ssl->rootCertificatePath;
-                $options[PDO::MYSQL_ATTR_SSL_KEY] = $this->config->ssl->privateKeyPath;
-                $options[PDO::MYSQL_ATTR_SSL_CERT] = $this->config->ssl->certificatePath;
+                $options[PdoMysql::ATTR_SSL_CA] = $this->config->ssl->rootCertificatePath;
+                $options[PdoMysql::ATTR_SSL_KEY] = $this->config->ssl->privateKeyPath;
+                $options[PdoMysql::ATTR_SSL_CERT] = $this->config->ssl->certificatePath;
 
-                $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = match ($this->config->ssl->verification) {
+                $options[PdoMysql::ATTR_SSL_VERIFY_SERVER_CERT] = match ($this->config->ssl->verification) {
                     SslVerification::None => false,
                     SslVerification::Ca => throw new InvalidArgumentException('Mysql SSL connections do not support to only verify the CA - only no verification or both CA and hostname verification are supported by the PHP driver'),
                     SslVerification::CaAndHostname => true,
@@ -50,7 +52,7 @@ final class ConnectionPDO implements ConnectionInterface
         }
 
         if ($this->config instanceof Pgsql) {
-            $options[PDO::PGSQL_ATTR_DISABLE_PREPARES] = false;
+            $options[PdoPgsql::ATTR_DISABLE_PREPARES] = false;
         }
 
         $this->options = $options;

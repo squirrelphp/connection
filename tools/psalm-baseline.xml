@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<files psalm-version="6.8.8@1361cd33008feb3ae2b4a93f1860e14e538ec8c2">
+<files psalm-version="6.14.1@cf26e6debc366836754f359ece5b68629a1ee185">
   <file src="src/PDO/ConnectionPDO.php">
     <PropertyNotSetInConstructor>
       <code><![CDATA[$pdo]]></code>
     </PropertyNotSetInConstructor>
-    <UndefinedConstant>
-      <code><![CDATA[PDO::PGSQL_ATTR_DISABLE_PREPARES]]></code>
-    </UndefinedConstant>
+    <UndefinedClass>
+      <code><![CDATA[PdoPgsql]]></code>
+    </UndefinedClass>
   </file>
 </files>

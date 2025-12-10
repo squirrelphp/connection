@@ -5,5 +5,5 @@ COPY docker/ssl/db_ssl.crt /var/lib/postgresql/server.crt
 COPY docker/ssl/db_ssl.key /var/lib/postgresql/server.key
 COPY docker/ssl/DadaismCA.crt /var/lib/postgresql/ca.crt
 
-RUN chmod 600 /var/lib/postgresql/server.key
-RUN chown postgres:postgres /var/lib/postgresql/server.key
+RUN chmod 600 /var/lib/postgresql/*
+RUN chown postgres:postgres /var/lib/postgresql/*

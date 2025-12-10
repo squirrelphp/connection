@@ -2,7 +2,7 @@
 
 $ignoreErrors = [];
 $ignoreErrors[] = [
-	'message' => '#^Method Squirrel\\\\Connection\\\\PDO\\\\ConnectionPDO\\:\\:fetchAll\\(\\) should return list\\<array\\<string, bool\\|float\\|int\\|string\\|null\\>\\> but returns array\\.$#',
+	'message' => '#^Method Squirrel\\\\Connection\\\\PDO\\\\ConnectionPDO\\:\\:fetchAll\\(\\) should return list\\<array\\<string, bool\\|float\\|int\\|string\\|null\\>\\> but returns array\\<array\\>\\.$#',
 	'identifier' => 'return.type',
 	'count' => 1,
 	'path' => __DIR__ . '/../src/PDO/ConnectionPDO.php',
